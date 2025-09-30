@@ -1,0 +1,246 @@
+# AI-Call 프로젝트 Cursor Rules
+# 주니어 개발자 5명이 협업하는 모노레포 환경을 위한 개발 가이드라인
+
+## 🏗️ 프로젝트 구조 및 컨텍스트
+
+이 프로젝트는 AI 전화를 통한 어르신 안부인사 서비스입니다.
+- **타겟 사용자**: 70~80세 어르신과 30~50대 보호자
+- **주요 기능**: AI 자동 전화, 일기 자동 작성, 할일 관리, 감정 모니터링
+- **기술 스택**: FastAPI(백엔드), React Native(모바일), PostgreSQL, Redis, Firebase
+
+### 모노레포 구조
+```
+ai-call/
+├── packages/           # 공통 패키지
+│   ├── shared-types/   # TypeScript 공통 타입
+│   └── constants/      # 공통 상수
+├── apps/
+│   ├── backend/        # FastAPI 백엔드
+│   └── mobile/         # React Native 모바일
+└── scripts/            # 개발 스크립트
+```
+
+## 📋 코딩 표준 및 컨벤션
+
+### 1. 파일 및 폴더 네이밍
+- **파일명**: camelCase (예: `userService.ts`, `DiaryScreen.tsx`)
+- **폴더명**: kebab-case (예: `shared-types`, `call-service`)
+- **컴포넌트**: PascalCase (예: `CallScreen`, `DiaryCard`)
+- **상수**: UPPER_SNAKE_CASE (예: `API_ENDPOINTS`, `DEFAULT_SETTINGS`)
+
+### 2. 코드 스타일
+- **들여쓰기**: 2칸 (TypeScript/JavaScript), 4칸 (Python)
+- **따옴표**: 작은따옴표 우선 (TypeScript), 큰따옴표 (Python)
+- **세미콜론**: TypeScript/JavaScript에서 필수
+- **라인 길이**: 최대 88자 (Python), 100자 (TypeScript)
+
+### 3. 타입 안전성
+- 모든 TypeScript 코드에서 `any` 타입 사용 금지
+- `@ai-call/shared-types` 패키지의 타입을 최대한 활용
+- API 요청/응답에 반드시 타입 정의 사용
+- Pydantic 모델을 사용하여 Python에서도 타입 안전성 보장
+
+## 🎯 개발 가이드라인
+
+### 1. 기능 개발 순서
+1. `packages/shared-types`에 필요한 타입 먼저 정의
+2. 백엔드 API 엔드포인트 구현
+3. 프론트엔드에서 API 연동
+4. 테스트 코드 작성
+5. 문서 업데이트
+
+### 2. 공통 패키지 활용
+- **타입 정의**: `@ai-call/shared-types`에서 import
+- **상수 사용**: `@ai-call/constants`에서 import
+- **API 엔드포인트**: `API_ENDPOINTS` 상수 사용 필수
+- **에러 코드**: `ErrorCode` enum 사용
+
+### 3. API 설계 원칙
+- RESTful 설계 준수
+- 일관된 응답 형식: `ApiResponse<T>` 타입 사용
+- 적절한 HTTP 상태 코드 사용
+- 페이지네이션: `PaginatedResponse<T>` 타입 사용
+- 에러 처리: 표준화된 에러 응답 형식
+
+### 4. 상태 관리 (모바일)
+- Zustand를 사용한 전역 상태 관리
+- 도메인별 슬라이스 분리 (auth, diary, call, todo, notification)
+- 로컬 상태는 React Hook 사용
+- 서버 상태는 React Query 패턴 고려
+
+## 🧪 테스트 가이드라인
+
+### 1. 테스트 작성 원칙
+- 모든 새로운 기능에 테스트 코드 작성 필수
+- 단위 테스트 > 통합 테스트 > E2E 테스트 순서로 작성
+- 테스트 파일명: `*.test.ts` (프론트엔드), `test_*.py` (백엔드)
+- 테스트 커버리지 80% 이상 유지
+
+### 2. 백엔드 테스트 (Pytest)
+```python
+# 예시: API 엔드포인트 테스트
+def test_create_diary(client, test_user):
+    response = client.post(
+        "/api/v1/diaries",
+        json={"content": "오늘 날씨가 좋았다", "mood": "happy"}
+    )
+    assert response.status_code == 201
+    assert response.json()["success"] is True
+```
+
+### 3. 프론트엔드 테스트 (Jest)
+```typescript
+// 예시: 컴포넌트 테스트
+test('DiaryCard renders correctly', () => {
+  const diary = { id: '1', content: '테스트 일기', mood: 'happy' };
+  render(<DiaryCard diary={diary} />);
+  expect(screen.getByText('테스트 일기')).toBeInTheDocument();
+});
+```
+
+## 🔧 개발 환경 및 도구
+
+### 1. 필수 도구
+- **Node.js** 18+
+- **Python** 3.11+
+- **Poetry** (Python 패키지 관리)
+- **PostgreSQL** (데이터베이스)
+- **Redis** (캐시)
+
+### 2. 개발 명령어
+```bash
+# 개발 환경 설정
+npm run setup
+
+# 개발 서버 실행
+npm run dev                 # 전체
+npm run dev:backend        # 백엔드만
+npm run dev:mobile         # 모바일만
+
+# 코드 품질 검사
+npm run lint               # 린트 검사
+npm run format             # 코드 포맷팅
+npm run typecheck          # 타입 검사
+npm test                   # 테스트 실행
+```
+
+### 3. Git 워크플로우
+- **브랜치 네이밍**: `feature/scope/description` (예: `feature/backend/ai-service`)
+- **커밋 메시지**: `type(scope): description` (예: `feat(mobile): add call screen`)
+- **PR 제목**: 커밋 메시지와 동일한 형식
+- **코드 리뷰**: 최소 1명 승인 후 머지
+
+## 🚨 주의사항 및 베스트 프랙티스
+
+### 1. 보안
+- **환경 변수**: 민감한 정보는 반드시 `.env` 파일 사용
+- **API 키**: 코드에 하드코딩 금지, 환경 변수로 관리
+- **개인정보**: 음성 데이터, 통화 내용 등 암호화 필수
+- **인증**: JWT 토큰 사용, 적절한 만료 시간 설정
+
+### 2. 성능
+- **이미지 최적화**: 업로드 시 압축 및 리사이징
+- **API 호출**: 불필요한 중복 호출 방지, 캐싱 활용
+- **메모리 관리**: 메모리 누수 방지, 적절한 가비지 컬렉션
+- **데이터베이스**: 인덱스 활용, N+1 쿼리 방지
+
+### 3. 사용자 경험 (UX)
+- **어르신 친화적 UI**: 큰 글씨, 간단한 인터페이스, 명확한 버튼
+- **보호자용 대시보드**: 상세한 정보, 효율적인 관리 도구
+- **오프라인 지원**: 네트워크 연결 끊김 시 적절한 처리
+- **접근성**: 스크린 리더 지원, 고대비 모드 고려
+
+### 4. 에러 처리
+- **사용자 친화적 메시지**: 기술적 용어 대신 이해하기 쉬운 설명
+- **로깅**: 적절한 로그 레벨 사용, 개인정보 로그 제외
+- **재시도 메커니즘**: 네트워크 오류 시 자동 재시도
+- **폴백 처리**: 서비스 장애 시 대체 방안 제공
+
+## 📝 문서화 가이드
+
+### 1. 코드 주석
+- **함수/메서드**: JSDoc (TypeScript), docstring (Python) 사용
+- **복잡한 로직**: 인라인 주석으로 설명
+- **TODO/FIXME**: 명확한 설명과 담당자 명시
+
+### 2. API 문서
+- FastAPI 자동 생성 문서 활용
+- Swagger UI에서 모든 엔드포인트 테스트 가능하도록 구성
+- 요청/응답 예시 포함
+
+### 3. README 업데이트
+- 새로운 기능 추가 시 README 업데이트
+- 설치 및 실행 방법 최신화
+- 트러블슈팅 가이드 추가
+
+## 🤝 팀 협업 규칙
+
+### 1. 코드 리뷰
+- **리뷰어**: 최소 1명, 가능하면 2명
+- **리뷰 기준**: 기능성, 가독성, 성능, 보안, 테스트
+- **피드백**: 건설적이고 구체적인 의견 제시
+- **응답 시간**: 24시간 이내 리뷰 완료
+
+### 2. 이슈 관리
+- **버그 리포트**: 재현 단계, 예상/실제 결과, 환경 정보 포함
+- **기능 요청**: 사용자 스토리 형식으로 작성
+- **라벨링**: 우선순위, 담당자, 상태 명확히 표시
+
+### 3. 커뮤니케이션
+- **일일 스탠드업**: 어제 한 일, 오늘 할 일, 블로커 공유
+- **주간 회고**: 잘된 점, 개선점, 액션 아이템 도출
+- **지식 공유**: 새로운 기술, 해결한 문제 팀과 공유
+
+## 🔍 디버깅 및 트러블슈팅
+
+### 1. 일반적인 문제
+- **의존성 문제**: `npm run clean` 후 재설치
+- **타입 에러**: 공통 패키지 빌드 확인
+- **빌드 실패**: 환경 변수 설정 확인
+- **데이터베이스 연결**: PostgreSQL 서비스 상태 확인
+
+### 2. 개발 도구
+- **로그 확인**: `docker-compose logs -f`
+- **데이터베이스**: pgAdmin 또는 CLI 도구 활용
+- **API 테스트**: Postman 또는 Thunder Client 사용
+- **모바일 디버깅**: Expo DevTools, React Native Debugger
+
+### 3. 성능 모니터링
+- **백엔드**: FastAPI 내장 프로파일러 활용
+- **프론트엔드**: React DevTools Profiler 사용
+- **데이터베이스**: 쿼리 실행 계획 분석
+
+## 📚 학습 리소스
+
+### 1. 기술별 학습 자료
+- **FastAPI**: [공식 문서](https://fastapi.tiangolo.com/)
+- **React Native**: [공식 가이드](https://reactnative.dev/)
+- **TypeScript**: [핸드북](https://www.typescriptlang.org/docs/)
+- **SQLAlchemy**: [튜토리얼](https://docs.sqlalchemy.org/en/20/tutorial/)
+
+### 2. 프로젝트 관련 문서
+- `README.md`: 전체적인 프로젝트 개요
+- `docs/api-specification.md`: API 상세 명세
+- `docs/database-schema.md`: 데이터베이스 설계
+- `docs/architecture.md`: 시스템 아키텍처
+
+## 🎯 주니어 개발자를 위한 팁
+
+### 1. 시작하기 전에
+- 프로젝트 전체 구조 파악하기
+- 공통 패키지 (`shared-types`, `constants`) 숙지
+- 기존 코드 스타일 관찰하고 따라하기
+
+### 2. 개발 중
+- 작은 단위로 자주 커밋하기
+- 막히면 즉시 팀에 질문하기
+- 코드 리뷰 피드백을 적극 수용하기
+
+### 3. 성장하기
+- 다른 팀원의 코드 읽어보기
+- 새로운 기술 학습하고 팀과 공유하기
+- 문서화 습관 기르기
+
+---
+
+**이 규칙들을 따라 일관성 있고 품질 높은 코드를 작성해주세요! 🚀**

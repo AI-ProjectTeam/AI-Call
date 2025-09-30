@@ -1,0 +1,92 @@
+# 의존성
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 환경 변수
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 로그
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 빌드 결과물
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 관련
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 테스트 커버리지
+coverage/
+*.coverage
+.nyc_output
+.coverage.*
+
+# 임시 파일
+*.tmp
+*.temp
+.cache/
+
+# React Native 관련
+.expo/
+.expo-shared/
+*.orig.*
+web-build/
+
+# Python 관련
+.pytest_cache/
+.mypy_cache/
+.tox/
+venv/
+env/
+ENV/
+
+# 데이터베이스
+*.db
+*.sqlite
+*.sqlite3
+
+# 업로드 파일
+uploads/
+media/
+
+# 백업 파일
+*.bak
+*.backup
+
+# 패키지 매니저
+.pnp.*
+.yarn-integrity
+
+# 기타
+*.pid
+*.seed
+*.pid.lock
